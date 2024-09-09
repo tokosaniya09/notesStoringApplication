@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fs = require('fs');
-const { log } = require('console');
 
 app.set("view engine", "ejs");
 app.use(express.json());
@@ -64,6 +63,16 @@ app.post("/editContent", (req, res) => {
     console.log(req.body);
 });
 
+app.delete('/delete/:filename', (req, res) => {
+    const filePath = path.join(__dirname, 'files', req.params.filename);
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error('Error deleting file:', err);
+            return res.status(500).json({ success: false, message: 'Failed to delete file' });
+        }
+        res.json({ success: true, message: 'File deleted successfully' });
+    });
+});
 
 
 app.listen(3000, () => {
