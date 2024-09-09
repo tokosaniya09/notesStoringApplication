@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fs = require('fs');
-const filesDir = path.join(__dirname, 'files');
 
 app.set("view engine", "ejs");
 app.use(express.json());
@@ -38,9 +37,11 @@ app.post("/edit", (req, res) => {
 });
 
 app.post("/create", (req, res) => {
-    fs.writeFile(`./files/${req.body.title.split(' ').join('')}.txt`, req.body.details, (err) => {
-        res.redirect("/")
-    })
+    if (req.body.title && req.body.details) {
+        fs.writeFile(`./files/${req.body.title.split(' ').join('')}.txt`, req.body.details, (err) => {
+            res.redirect("/")
+        })
+    }
 }) 
 
 app.get("/editContent/:filename", (req, res) => {
@@ -65,17 +66,15 @@ app.post("/editContent", (req, res) => {
 });
 
 app.delete('/delete/:filename', (req, res) => {
-    const fileName = req.params.filename;
-    const filePath = path.join(filesDir, fileName);
-
-    fs.unlink(filePath, err => {
+    const filePath = path.join(__dirname, 'files', req.params.filename);
+    fs.unlink(filePath, (err) => {
         if (err) {
-            console.error('Error deleting file: ', err);
-            return res.status(500).json({success: false, message: 'Failed to delete file'});
+            console.error('Error deleting file:', err);
+            return res.status(500).json({ success: false, message: 'Failed to delete file' });
         }
         res.json({ success: true, message: 'File deleted successfully' });
     });
-}); 
+});
 
 
 app.listen(3000, () => {

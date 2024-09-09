@@ -1,19 +1,44 @@
+let fileToDelete = '';
+
 function confirmDelete(filename) {
-    if (confirm("Are you sure you want to delete this file?")) {
-        fetch(`/delete/${filename}`, {
-            method: 'DELETE'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('File deleted successfully');
-                location.reload();
-            } else {
-                alert('Failed to delete the file');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        })
-    }
+	fileToDelete = filename;
+	document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+	fetch(`/delete/${fileToDelete}`, {
+		method: 'DELETE'
+	})
+	.then(response => {
+		if (!response.ok) {
+		  throw new Error('Network response was not ok'); 
+		}
+		return response.json();
+	})
+	.then(data => {
+		if (data.success) {
+			showSuccessToast(); 
+			setTimeout(() => {
+				location.reload(); 
+			}, 1000);
+		} else {
+			console.error('Failed to delete the file');
+		}
+	})
+	.catch(error => {
+		console.error('Error:', error);
+	});
+	document.getElementById('deleteModal').classList.add('hidden');
+});
+
+document.getElementById('cancelDeleteBtn').addEventListener('click', function () {
+	document.getElementById('deleteModal').classList.add('hidden');
+});
+
+function showSuccessToast() {
+	const toast = document.getElementById('successToast');
+	toast.classList.remove('hidden');
+	setTimeout(() => {
+		toast.classList.add('hidden');
+	}, 1000);
 }
